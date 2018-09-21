@@ -7,13 +7,13 @@ let users = [1,2,3,4,5,6,7,8,9].map((i)=>(
 		addresses:[1,2].map((i1=>`Name${i}_${i1}@mail.ru`))
 	})
 )
-export default function (state=null,action){
+export default function (state=users,action){
 	switch(action.type){
 		case "SAVE_USERS":
-			let newUsers = action.payload;
+			const newUsers = action.payload;
 			
 			users = users.map(u=>{
-				let index = newUsers.findIndex(u1=>u1.id===u.id);
+				const index = newUsers.findIndex(u1=>u1.id===u.id);
 				if(index!==-1){
 					return newUsers[index];
 				} else {
@@ -22,6 +22,6 @@ export default function (state=null,action){
 			})
 			return users;
 		default:
-			return users;
+			return state;
 	}
 }

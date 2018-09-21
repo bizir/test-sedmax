@@ -1,37 +1,33 @@
 import React,{Component} from 'react';
+import PropTypes from 'prop-types';
 
 import {Row,Input,Button,Icon} from 'antd';
 import './ValuesList.less';
 
 
-class ValuesList extends Component {
 
-	componentDidMount() {
-		
-	}
+class ValuesList extends Component {
 	onAdd(){
 		this.onChange([...this.props.value,""]);
 	}
 	onDelete(index){
-		const values = [...this.props.value];
-		values.splice(index, 1);
-		this.onChange(values)
+		let {value} = this.props;
+		this.onChange(value.filter((v,i)=>i!==index))
 	}
 	onChange(values) {
 		let {onChange} = this.props;
 		if(onChange)onChange(values);
 	}
 	render() {
-		let {value} = this.props;
-		value=(value)?value:[];
+		const {value} = this.props;
 		return <Row>
 		{
 			value.map((v,i)=>
-				<Row key={i}>
+				<Row key={i+"_"+value.length}>
 					<Input 
 						value={v}
 						onChange={(e)=>{
-							let values = value.map((v,i1)=>{
+							const values = value.map((v,i1)=>{
 								if(i===i1){
 									return e.target.value;
 								}
@@ -44,11 +40,13 @@ class ValuesList extends Component {
 				</Row>
 			)
 		}
-		<Button onClick={()=>this.onAdd()} type="primary" style={{ marginBottom: 16 }}>
-          Добавить
+		<Button onClick={()=>this.onAdd()} type="primary">
+			Добавить
         </Button>
 		</Row>
 	}
 } 
-
+ValuesList.propTypes = {
+	value: 	PropTypes.array
+};
 export default ValuesList;

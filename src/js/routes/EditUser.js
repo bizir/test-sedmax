@@ -1,42 +1,41 @@
 import React,{Component} from 'react';
+import PropTypes from 'prop-types';
 
-import {Row,Col,Button} from 'antd';
+import {Row,Col,Button,Tree} from 'antd';
 
 import {bindActionCreators} from  'redux';
 import {connect} from 'react-redux';
 import {saveUsers} from "../actions/index";
 
-import { Tree } from 'antd';
-import Table from "../components/Table";
+import Table from "../components/Table/";
 import "./EditUser.less";
 
 const TreeNode = Tree.TreeNode;
 class EditUser extends Component {
-	state={
-		ids:[],
-		users:[]
+	constructor(props) {
+		super(props);
+		this.state={
+			ids:[],
+			users:[]
+		}
 	}
-	componentWillMount () {
+	componentDidMount () {
 		const {match} = this.props;
-		this.setState({users:this.props.users,ids:[parseInt(match.params.id,10)]});
-	}
-	componentWillReceiveProps(nextProps){
-		this.setState({users:this.props.users});
+		this.setState({users:this.props.users,ids:[match.params.id]});
 	}
 	render() {
-		const {match,saveUsers,history} = this.props;
+		const {saveUsers,history} = this.props;
 		const {ids,users} = this.state;
-		
 		return 	<Row>
 					<Col xs={4}>
 						<Tree
 							checkable
 							selectable={false}
 							defaultExpandedKeys={['0']}
-							defaultCheckedKeys={[(match.params.id)?match.params.id:'']}
+							checkedKeys={[...ids]}
 							onSelect={this.onSelect}
 							onCheck={(ids)=>{
-								this.setState({ids:ids.map(id=>parseInt(id,10))});
+								this.setState({ids});
 							}}
 						  >
 							  <TreeNode title={'Сущности'} key={0}>
@@ -50,22 +49,24 @@ class EditUser extends Component {
 					</Col>
 					<Col xs={20}>
 						<Table onChange={(newUsers)=>{
-							let {users} = this.props;
-							users = users.map(u=>{
-								let index = newUsers.findIndex(u1=>u1.id===u.id);
+							const updateUsers = users.map(u=>{
+								const index = newUsers.findIndex(u1=>u1.id===u.id);
 								if(index!==-1){
 									return newUsers[index];
 								} else {
 									return u;
 								}
 							})
-							this.setState({users});
-						}} isEditable={true} users={users.filter(u=>(ids.indexOf(u.id)!==-1 || ids.indexOf(0)!==-1))} />
+							this.setState({users:updateUsers});
+						}} isEditable={true} users={users.filter(u=>(ids.indexOf(u.id.toString())!==-1 || ids.indexOf('0')!==-1))} />
 						<Row>
-							<Button onClick={()=>{
-								saveUsers(this.state.users)
-								history.push("/");
-							}}>Сохранить</Button>
+							<Button 
+								onClick={()=>{
+									saveUsers(this.state.users)
+									history.push("/");
+								}}
+								disabled={ids.length===0}	
+							>Сохранить</Button>
 							<Button type="danger" onClick={()=>{
 								history.push("/");
 							}}>Отменить</Button>
@@ -74,7 +75,22 @@ class EditUser extends Component {
 				</Row>	
 	}
 }
-
+EditUser.propTypes = {
+	match:	PropTypes.shape({
+				params: PropTypes.shape({
+					id: PropTypes.string.isRequired
+				}).isRequired
+			}).isRequired,
+	users: 	PropTypes.arrayOf(
+				PropTypes.shape({
+				  id: PropTypes.number.isRequired,
+				  name: PropTypes.string.isRequired,
+				  condition: PropTypes.bool.isRequired,
+				  email: PropTypes.string.isRequired,
+				  addresses: PropTypes.array
+				})
+			).isRequired
+};
 function mapStateToProps (state) {
 	return {
 		users:state.users,

@@ -1,3 +1,1 @@
-export const saveUsers = (users) => dispatch=> {
-	dispatch({type:'SAVE_USERS',payload:users});
-};
+export const saveUsers = users => ({type:'SAVE_USERS',payload:users});
